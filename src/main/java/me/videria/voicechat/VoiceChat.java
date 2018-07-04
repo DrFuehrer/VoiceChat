@@ -109,63 +109,67 @@ public class VoiceChat extends LabyModAddon {
 	public void onTick(TickEvent.ClientTickEvent event) {
 		if ((LabyMod.getInstance().isInGame()) && (System.currentTimeMillis() > lastRequest) && mc.getCurrentServerData() != null && active) {
 			lastRequest = (System.currentTimeMillis() + (int) (requestInterval * 1000L));
+			
+			SCHEDULER.execute(new Runnable() {
+				public void run() {
 
-				SCHEDULER.execute(new Runnable() {
-					public void run() {
-						try {
-							if(!servers.containsKey(mc.getCurrentServerData().serverIP)) {
-								JsonParser parser = new JsonParser();
-								JsonObject info = parser.parse(org.apache.commons.io.IOUtils.toString(new URL("https://videria.eu/Minecraft/VoiceChat/api.php?ip=" + mc.getCurrentServerData().serverIP.toLowerCase().replace(":25565", "")))).getAsJsonObject();
-
-								if(info.get("enabled").getAsString().equals("true")) {
-									serverInfo.put(mc.getCurrentServerData().serverIP, new VoiceServer(info.get("channelName").getAsString(), info.get("channelPassword").getAsString(), mc.getCurrentServerData().serverIP));
-									servers.put(mc.getCurrentServerData().serverIP, true);
-								} else {
-									servers.put(mc.getCurrentServerData().serverIP, false);
-								}
+					
+					try {
+						if(!servers.containsKey(mc.getCurrentServerData().serverIP)) {
+							JsonParser parser = new JsonParser();
+							JsonObject info = parser.parse(org.apache.commons.io.IOUtils.toString(new URL("http://videria.cf/Minecraft/VoiceChat/api.php?ip=" + mc.getCurrentServerData().serverIP.toLowerCase().replace(":25565", "")))).getAsJsonObject();
+							
+							System.out.println("Server: " + mc.getCurrentServerData().serverIP + " Enabled: " + info.get("enabled").getAsString());
+							
+							if(info.get("enabled").getAsString().equals("true")) {
+								serverInfo.put(mc.getCurrentServerData().serverIP, new VoiceServer(info.get("channelName").getAsString(), info.get("channelPassword").getAsString(), mc.getCurrentServerData().serverIP));
+								servers.put(mc.getCurrentServerData().serverIP, true);
 							} else {
-								if(servers.get(mc.getCurrentServerData().serverIP)) {
-									String playerInfo = "";
-									java.util.List<EntityPlayer> list = Minecraft.getMinecraft().theWorld.playerEntities;
-									for(EntityPlayer player : list) {
-										if(player.getName() != Minecraft.getMinecraft().thePlayer.getName()) {
-											double x1 = mc.thePlayer.posX;
-											double y1 = mc.thePlayer.posY;
-											double z1 = mc.thePlayer.posZ;
-											double x2 = player.posX;
-											double y2 = player.posY;
-											double z2 = player.posZ;
-											double distance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2) + Math.pow(z1 - z2, 2));
+								servers.put(mc.getCurrentServerData().serverIP, false);
+							}
+						} else {
+							if(servers.get(mc.getCurrentServerData().serverIP)) {
+								String playerInfo = "";
+								java.util.List<EntityPlayer> list = Minecraft.getMinecraft().theWorld.playerEntities;
+								for(EntityPlayer player : list) {
+									if(player.getName() != Minecraft.getMinecraft().thePlayer.getName()) {
+										double x1 = mc.thePlayer.posX;
+										double y1 = mc.thePlayer.posY;
+										double z1 = mc.thePlayer.posZ;
+										double x2 = player.posX;
+										double y2 = player.posY;
+										double z2 = player.posZ;
+										double distance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2) + Math.pow(z1 - z2, 2));
+										
+										if(distance <= voiceRange) {
+											Vec3 vector = player.getPositionVector().subtract(mc.thePlayer.getPositionVector());
 											
-											if(distance <= voiceRange) {
-												Vec3 vector = player.getPositionVector().subtract(mc.thePlayer.getPositionVector());
-												
-												double  rotation = Math.PI / 180 * (mc.thePlayer.cameraYaw * -1);
-												double x = vector.xCoord * Math.cos(rotation) - vector.yCoord * Math.sin(rotation);
-												double y = vector.xCoord * Math.sin(rotation) + vector.yCoord * Math.cos(rotation);
-												x = x * 10 / voiceRange;
-												y = y * 10 / voiceRange;
-												
-												double volume = (distance < voiceRange ? ((-1/Math.pow((distance - voiceRange), 2))) : 0);
-												
-												if(playerInfo.equals("")) {
-													playerInfo = player.getName() + "~" + 0 + "~" + 0 + "~0~" + volume;
-												} else {
-													playerInfo = ";" + player.getName() + "~" + 0 + "~" + 0 + "~0~" + volume;
-												}
-												Debug.log(Debug.EnumDebugMode.ADDON, "Player: " + player.getName() + " Distance: " + distance + " 3D: (" + x + "|" + y + ") Volume: " + volume);
+											double  rotation = Math.PI / 180 * (mc.thePlayer.cameraYaw * -1);
+											double x = vector.xCoord * Math.cos(rotation) - vector.yCoord * Math.sin(rotation);
+											double y = vector.xCoord * Math.sin(rotation) + vector.yCoord * Math.cos(rotation);
+											x = x * 10 / voiceRange;
+											y = y * 10 / voiceRange;
+											
+											double volume = (distance < voiceRange ? ((-1/Math.pow((distance - voiceRange), 2))) : 0);
+											
+											if(playerInfo.equals("")) {
+												playerInfo = player.getName() + "~" + 0 + "~" + 0 + "~0~" + volume;
+											} else {
+												playerInfo = ";" + player.getName() + "~" + 0 + "~" + 0 + "~0~" + volume;
 											}
+											System.out.println("Player: " + player.getName() + " Distance: " + distance + " 3D: (" + x + "|" + y + ") Volume: " + volume);
 										}
 									}
-									org.apache.commons.io.IOUtils.toString(new URL("http://localhost:15555/custom_players2/" + serverInfo.get(mc.getCurrentServerData().serverIP).getChannelName() + "/" + serverInfo.get(mc.getCurrentServerData().serverIP).getChannelPassword() + "/" + mc.thePlayer.getName() + "/" + playerInfo));
-
 								}
+								org.apache.commons.io.IOUtils.toString(new URL("http://localhost:15555/custom_players2/" + serverInfo.get(mc.getCurrentServerData().serverIP).getChannelName() + "/" + serverInfo.get(mc.getCurrentServerData().serverIP).getChannelPassword() + "/" + mc.thePlayer.getName() + "/" + playerInfo));
+
 							}
-						} catch (Exception e) {
-							Debug.log(Debug.EnumDebugMode.ADDON, "Error: " + e.getMessage());
 						}
+					} catch (Exception e) {
+						System.out.println("Error: " + e.getMessage());
 					}
-				});
+				}
+			});
 		}
 	}
 	
