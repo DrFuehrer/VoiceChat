@@ -2,55 +2,69 @@ package me.videria.voicechat;
 
 import net.labymod.ingamegui.moduletypes.SimpleModule;
 import net.labymod.settings.elements.ControlElement.IconData;
+import net.labymod.utils.Material;
 
 public class VoiceModul extends SimpleModule {
 
 	@Override
 	public String getDefaultValue() {
-		// TODO Auto-generated method stub
-		return null;
+		return "Inaktive";
 	}
 
 	@Override
 	public String getDisplayName() {
-		// TODO Auto-generated method stub
-		return null;
+		return "VoiceChat";
 	}
 
 	@Override
 	public String getDisplayValue() {
-		// TODO Auto-generated method stub
-		return null;
+		if(VoiceChat.getInstance() == null) {
+	        return "Inaktive";
+		}
+		if(VoiceChat.getInstance().getMc().getCurrentServerData() != null) {
+			if(VoiceChat.getInstance().getServerInfo().containsKey(VoiceChat.getInstance().getMc().getCurrentServerData().serverIP) && VoiceChat.getInstance().getActive()) {
+				return "Aktive";
+			} else {
+		        return "Inaktive";
+			}
+		} else {
+	        return "Inaktive";
+		}
 	}
 
 	@Override
 	public String getDescription() {
-		// TODO Auto-generated method stub
-		return null;
+        return "Display if the Server is supporting VoiceChat addon.";
 	}
 
 	@Override
 	public IconData getIconData() {
-		// TODO Auto-generated method stub
-		return null;
+		if(VoiceChat.getInstance() == null) {
+	        return new IconData( Material.REDSTONE_TORCH_OFF );
+		}
+		if(VoiceChat.getInstance().getMc().getCurrentServerData() != null) {
+			if(VoiceChat.getInstance().getServerInfo().containsKey(VoiceChat.getInstance().getMc().getCurrentServerData().serverIP) && VoiceChat.getInstance().getActive()) {
+		        return new IconData( Material.REDSTONE_TORCH_ON );
+			} else {
+		        return new IconData( Material.REDSTONE_TORCH_OFF );
+			}
+		} else {
+	        return new IconData( Material.REDSTONE_TORCH_OFF );
+		}
 	}
 
 	@Override
 	public String getSettingName() {
-		// TODO Auto-generated method stub
-		return null;
+        return "VoiceChat Status";
 	}
 
 	@Override
 	public int getSortingId() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	public void loadSettings() {
-		// TODO Auto-generated method stub
-		
 	}
 
 }
