@@ -33,6 +33,7 @@ public class VoiceChat extends LabyModAddon {
 	private static VoiceChat instance;
 	
 	private int voiceRange;
+	private boolean threeDSound = true;
 	private boolean active = true;
 	private double requestInterval = 0.2;
 	private Minecraft mc;
@@ -82,6 +83,7 @@ public class VoiceChat extends LabyModAddon {
 	@Override
 	public void loadConfig() {
 		this.voiceRange = getConfig().has("voiceRange") ? getConfig().get("voiceRange").getAsInt() : 10;
+		this.threeDSound = getConfig().has("threeDSound") ? getConfig().get("threeDSound").getAsBoolean() : true;
 	}
 
 	/**
@@ -93,6 +95,7 @@ public class VoiceChat extends LabyModAddon {
 	@Override
 	protected void fillSettings(List<SettingsElement> subSettings) {
 		subSettings.add(new SliderElement("Voice Range", this, new IconData(Material.ITEM_FRAME), "voiceRange", this.voiceRange).setRange(3, 15));
+		subSettings.add(new BooleanElement("3D Sound", this, new IconData(Material.ANVIL), "threeDSound", this.threeDSound));
 
 		subSettings.add( new BooleanElement( "Enabled", new ControlElement.IconData( Material.LEVER ), new Consumer<Boolean>() {
 		    @Override
@@ -144,18 +147,26 @@ public class VoiceChat extends LabyModAddon {
 										if(distance <= voiceRange) {
 											Vec3 vector = player.getPositionVector().subtract(mc.thePlayer.getPositionVector());
 											
-											double  rotation = mc.thePlayer.cameraYaw;
+											double  rotation = mc.thePlayer.cameraYaw / 180;
 											double x = vector.xCoord * Math.cos(rotation) - vector.yCoord * Math.sin(rotation);
 											double y = vector.xCoord * Math.sin(rotation) + vector.yCoord * Math.cos(rotation);
 											x = x * 10 / voiceRange;
 											y = y * 10 / voiceRange;
 											
-											double volume = ((distance / voiceRange) * -50) + 20;
+											double volume = ((distance / voiceRange) * -50) + 10;
 											
-											if(playerInfo.equals("")) {
-												playerInfo = player.getName() + "~" + x + "~" + y + "~0~" + volume;
+											if(threeDSound) {
+												if(playerInfo.equals("")) {
+													playerInfo = player.getName() + "~" + x + "~" + y + "~0~" + volume;
+												} else {
+													playerInfo = playerInfo + ";" + player.getName() + "~" + x + "~" + y + "~0~" + volume;
+												}
 											} else {
-												playerInfo = playerInfo + ";" + player.getName() + "~" + x + "~" + y + "~0~" + volume;
+												if(playerInfo.equals("")) {
+													playerInfo = player.getName() + "~" + 0 + "~" + 0 + "~0~" + volume;
+												} else {
+													playerInfo = playerInfo + ";" + player.getName() + "~" + 0 + "~" + 0 + "~0~" + volume;
+												}
 											}
 											System.out.println("Player: " + player.getName() + " Distance: " + distance + " 3D: (" + x + "|" + y + ") Volume: " + volume);
 										}
