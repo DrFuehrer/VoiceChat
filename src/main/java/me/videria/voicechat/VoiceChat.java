@@ -144,18 +144,18 @@ public class VoiceChat extends LabyModAddon {
 										if(distance <= voiceRange) {
 											Vec3 vector = player.getPositionVector().subtract(mc.thePlayer.getPositionVector());
 											
-											double  rotation = Math.PI / 180 * (mc.thePlayer.cameraYaw * -1);
+											double  rotation = mc.thePlayer.cameraYaw;
 											double x = vector.xCoord * Math.cos(rotation) - vector.yCoord * Math.sin(rotation);
 											double y = vector.xCoord * Math.sin(rotation) + vector.yCoord * Math.cos(rotation);
 											x = x * 10 / voiceRange;
 											y = y * 10 / voiceRange;
 											
-											double volume = distance - voiceRange;
+											double volume = ((distance / voiceRange) * -50) + 20;
 											
 											if(playerInfo.equals("")) {
-												playerInfo = player.getName() + "~" + 0 + "~" + 0 + "~0~" + volume;
+												playerInfo = player.getName() + "~" + x + "~" + y + "~0~" + volume;
 											} else {
-												playerInfo = ";" + player.getName() + "~" + 0 + "~" + 0 + "~0~" + volume;
+												playerInfo = ";" + player.getName() + "~" + x + "~" + y + "~0~" + volume;
 											}
 											System.out.println("Player: " + player.getName() + " Distance: " + distance + " 3D: (" + x + "|" + y + ") Volume: " + volume);
 										}
