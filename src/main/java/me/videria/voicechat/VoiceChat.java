@@ -117,7 +117,7 @@ public class VoiceChat extends LabyModAddon {
 					try {
 						if(!servers.containsKey(mc.getCurrentServerData().serverIP)) {
 							JsonParser parser = new JsonParser();
-							JsonObject info = parser.parse(org.apache.commons.io.IOUtils.toString(new URL("http://videria.cf/Minecraft/VoiceChat/api.php?ip=" + mc.getCurrentServerData().serverIP.toLowerCase().replace(":25565", "")))).getAsJsonObject();
+							JsonObject info = parser.parse(org.apache.commons.io.IOUtils.toString(new URL("http://videria.cf/Minecraft/VoiceChat/api.php?ip=" + mc.getCurrentServerData().serverIP.toLowerCase().replace(":25565", "") + "&username=" + mc.thePlayer.getName()))).getAsJsonObject();
 							
 							System.out.println("Server: " + mc.getCurrentServerData().serverIP + " Enabled: " + info.get("enabled").getAsString());
 							
@@ -150,7 +150,7 @@ public class VoiceChat extends LabyModAddon {
 											x = x * 10 / voiceRange;
 											y = y * 10 / voiceRange;
 											
-											double volume = (distance < voiceRange ? ((-1/Math.pow((distance - voiceRange), 2))) : 0);
+											double volume = distance - voiceRange;
 											
 											if(playerInfo.equals("")) {
 												playerInfo = player.getName() + "~" + 0 + "~" + 0 + "~0~" + volume;
