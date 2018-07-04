@@ -155,7 +155,7 @@ public class VoiceChat extends LabyModAddon {
 											if(playerInfo.equals("")) {
 												playerInfo = player.getName() + "~" + x + "~" + y + "~0~" + volume;
 											} else {
-												playerInfo = ";" + player.getName() + "~" + x + "~" + y + "~0~" + volume;
+												playerInfo = playerInfo + ";" + player.getName() + "~" + x + "~" + y + "~0~" + volume;
 											}
 											System.out.println("Player: " + player.getName() + " Distance: " + distance + " 3D: (" + x + "|" + y + ") Volume: " + volume);
 										}
