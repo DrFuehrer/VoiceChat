@@ -2,16 +2,19 @@ package me.videria.voicechat;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import jdk.nashorn.internal.parser.JSONParser;
 import net.labymod.api.LabyModAddon;
+import net.labymod.api.events.ServerMessageEvent;
 import net.labymod.main.LabyMod;
 import net.labymod.settings.elements.BooleanElement;
 import net.labymod.settings.elements.ControlElement;
@@ -23,6 +26,7 @@ import net.labymod.utils.Debug;
 import net.labymod.utils.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -38,6 +42,7 @@ public class VoiceChat extends LabyModAddon {
 	private double requestInterval = 0.2;
 	private Minecraft mc;
 	private HashMap<String, Boolean> servers = new HashMap<String, Boolean>();
+	private ArrayList<String> activatedByServer = new ArrayList<String>();
 	private HashMap<String, VoiceServer> serverInfo = new HashMap<String, VoiceServer>();
 	
 	/**
@@ -51,6 +56,24 @@ public class VoiceChat extends LabyModAddon {
 	    VoiceModul module = new VoiceModul();
 		getApi().registerModule(module);
 	    getApi().registerForgeListener( this );
+	    
+
+		
+		getApi().getEventManager().register( new ServerMessageEvent() {
+		    public void onServerMessage( String messageKey, JsonElement serverMessage ) {
+		         if( messageKey.equals( "ActivateVoiceChat" )) {
+		        	if(!activatedByServer.contains(mc.getCurrentServerData().serverIP)) {
+		        		activatedByServer.add(mc.getCurrentServerData().serverIP);
+		        	}
+		        }
+		        if( messageKey.equals( "DeactivateVoiceChat" )) {
+		        	if(activatedByServer.contains(mc.getCurrentServerData().serverIP)) {
+		        		activatedByServer.remove(mc.getCurrentServerData().serverIP);
+		        	}
+		        }
+		    }
+
+		} );
 	}
 
 	public static VoiceChat getInstance() {
@@ -131,7 +154,7 @@ public class VoiceChat extends LabyModAddon {
 								servers.put(mc.getCurrentServerData().serverIP, false);
 							}
 						} else {
-							if(servers.get(mc.getCurrentServerData().serverIP)) {
+							if(servers.get(mc.getCurrentServerData().serverIP) && activatedByServer.contains(mc.getCurrentServerData().serverIP)) {
 								String playerInfo = "";
 								java.util.List<EntityPlayer> list = Minecraft.getMinecraft().theWorld.playerEntities;
 								for(EntityPlayer player : list) {
