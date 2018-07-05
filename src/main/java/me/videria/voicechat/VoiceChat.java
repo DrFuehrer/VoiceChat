@@ -92,6 +92,10 @@ public class VoiceChat extends LabyModAddon {
 		return serverInfo;
 	}
 	
+	public ArrayList<String> getActivatedServer() {
+		return activatedByServer;
+	}
+	
 	/**
 	 * Called when the addon gets disabled
 	 */

@@ -26,7 +26,11 @@ public class VoiceModul extends SimpleModule {
 		}
 		if(VoiceChat.getInstance().getMc().getCurrentServerData() != null) {
 			if(VoiceChat.getInstance().getServerInfo().containsKey(VoiceChat.getInstance().getMc().getCurrentServerData().serverIP) && VoiceChat.getInstance().getActive()) {
-				return "Aktive";
+				if(VoiceChat.getInstance().getActivatedServer().contains(VoiceChat.getInstance().getMc().getCurrentServerData().serverIP)) {
+					return "Aktive";
+				} else {
+					return "Inaktive (Wrong Server)";
+				}
 			} else {
 		        return "Inaktive (Server not Supported)";
 			}
